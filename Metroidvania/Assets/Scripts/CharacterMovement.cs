@@ -193,20 +193,24 @@ public class CharacterMovement : MonoBehaviour
                     Flip();
                     status.checkTimer.Start();
                     canDoubleJump = true;
-                    animator.SetBool("IsWallSliding", true);
+                    //animator.SetBool("IsWallSliding", true);
+                    //Debug.Log("벽 슬라이딩 시작");
                 }
-                status.isDashing = true;
+                status.isDashing = false;
 
                 if (m_IsWallSliding)            // 벽 슬라이딩 중
                 {
+                    animator.SetBool("IsWallSliding", true);
                     if (move * transform.localScale.x > 0.1f)
                     {
                         status.endSlidingTimer.Start();
+                        //Debug.Log("벽 슬라이딩 중 if");
                     }
                     else
                     {
                         oldWallSliding = true;
                         m_Rigidbody2D.velocity = new Vector2(-transform.localScale.x * 2, -5);
+                        //Debug.Log("벽 슬라이딩 중 else");
                     }
                 }
 
