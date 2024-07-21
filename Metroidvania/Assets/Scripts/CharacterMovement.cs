@@ -20,6 +20,7 @@ public class CharacterMovement : MonoBehaviour
     private float limitFallSpeed = 25f;                                             // 낙하 속도 제한
 
     public bool canDoubleJump = true;                                               // 플레이어가 더블 점프를 할 수 있는지 여부
+    public bool dashDone = false;                                                   // 대쉬가 계속 되는 것을 막기 위해 추가
     private bool m_IsWall = false;                                                  // 플레이어 앞에 벽이 있는지 여부
     private bool m_IsWallSliding = false;                                           // 플레이어가 벽을 타고 있는지 여부
     private bool oldWallSliding = false;                                            // 이전 프레임에서 플레이어가 벽을 타고 있었는지 여부
@@ -66,6 +67,7 @@ public class CharacterMovement : MonoBehaviour
             if (groundColliders[i].gameObject != gameObject)
             {
                 m_IsGrounded = true;
+                dashDone = false;
                 if (!wasGrounded)
                 {
                     OnLandEvent.Invoke();
@@ -91,6 +93,7 @@ public class CharacterMovement : MonoBehaviour
             if (wallColliders[i].gameObject != gameObject)
             {
                 m_IsWall = true;
+                dashDone = false;
                 if (!m_IsGrounded && !status.isDashing && m_Rigidbody2D.velocity.y < 0)
                 {
                     m_IsWallSliding = true;
@@ -144,9 +147,10 @@ public class CharacterMovement : MonoBehaviour
     {
         if (status.canMove)             // 클래스에서 이동이 가능하다고 하면
         {
-            if (dash && status.canDash && !m_IsWallSliding)     // 대쉬가 가능한 조건을 검사하여 대쉬 실행
+            if (dash && status.canDash && !m_IsWallSliding && !dashDone)     // 대쉬가 가능한 조건을 검사하여 대쉬 실행
             {
                 status.StartDash(0.1f);
+                dashDone = true;
             }
             if (status.isDashing)       // 대쉬 중일 때
             {
@@ -229,7 +233,7 @@ public class CharacterMovement : MonoBehaviour
                     m_WallCheck.localPosition = new Vector3(Mathf.Abs(m_WallCheck.localPosition.x), m_WallCheck.localPosition.y, 0);
                     status.moveTimer.Start();
                 }
-                else if(dash && status.canDash)         // 벽 대쉬 설정
+                else if(dash && status.canDash && !dashDone)         // 벽 대쉬 설정
                 {
                     m_IsWallSliding = false;
                     animator.SetBool("IsWallSliding", false);
@@ -237,6 +241,7 @@ public class CharacterMovement : MonoBehaviour
                     m_WallCheck.localPosition = new Vector3(Mathf.Abs(m_WallCheck.localPosition.x), m_WallCheck.localPosition.y, 0);
                     canDoubleJump = true;
                     status.StartDash(0.1f);
+                    dashDone = true;
                 }
             }
             else if (m_IsWallSliding && !m_IsWall && status.checkTimer.GetRemainingTime() <= 0) // 벽 슬라이딩 중이고 벽이 끝났을 때
